@@ -1,0 +1,273 @@
+<html>
+<head>
+<style>
+body{
+margin: 0;
+
+}
+canvas {
+width: 100;
+height: 90;
+}
+</style>
+</head>
+<body>
+    <audio id="driving">
+      <source src="sounds/50910__rutgermuller__in-car-driving.wav" type="audio/wav" />
+      Your browser does not support WAV files in the audio element.
+    </audio>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r79/three.min.js"></script>
+   <script src="lib/OrbitControls.js"></script>
+<input type="button" value="Restart" onClick="document.location.reload(true)">
+>
+
+
+<script>
+
+    function Car()
+{
+
+    let avColors = [0x4d2fff,0xE51837,0x800080,0x037272,0xb500f4,0x1FD5ED,0xed1f91]
+    this.WholeCar = new THREE.Group();
+
+    this.CarBody = new THREE.Mesh(
+        new THREE.BoxGeometry(10, 20, 10),
+        new THREE.MeshBasicMaterial({ color: 0xffffff, flatShading: true})
+    );
+    this.CarBody.translateY(0);
+    this.CarBody.castShadow = true;
+    this.CarBody.receiveShadow = true;
+    this.WholeCar.add(this.CarBody);
+    // console.log(this.CarBody.position);
+    var CarMid = new THREE.Mesh(
+        new THREE.BoxGeometry(10, 10, 3),
+        new THREE.MeshBasicMaterial({ color: avColors[Math.round(Math.random()*(avColors.length-1))], flatShading: true})
+    );
+    CarMid.translateZ(8);
+    CarMid.castShadow = true;
+    CarMid.receiveShadow = true;
+    this.WholeCar.add(CarMid);
+    var wheelMesh = new THREE.CylinderGeometry(2, 2, 2);
+    var wheelMat = new THREE.MeshBasicMaterial({ color: 0x333333, flatShading: true });
+
+    var Wheel1 = new THREE.Mesh(wheelMesh,wheelMat),
+        Wheel2 = new THREE.Mesh(wheelMesh,wheelMat);
+    Wheels = new THREE.Group();
+    Wheel1.translateY(-10);
+    Wheels.add(Wheel1);
+    Wheels.add(Wheel2);
+    Wheels.translateX(-5);
+    // Wheels.position.x = -60;
+    // Wheels.position.z = 40;
+    Wheels.rotateZ(Math.PI/2);
+
+
+    this.WholeCar.add(Wheels);
+    this.WholeCar.scale.set(1.5,1.5,1.5);
+}
+var audio = new Audio("sounds/50910__rutgermuller__in-car-driving.wav");
+let played = false;
+
+const scene = new THREE.Scene();
+const camera= new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.rotation.x=(Math.PI/4);
+        camera.position.z = 75;
+        camera.position.y = -50;
+const renderer= new THREE.WebGLRenderer();
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+
+
+    const loader = new THREE.TextureLoader();
+    scene.background = loader.load('textures/street1.jpg');
+
+
+
+
+
+
+
+
+light = new THREE.DirectionalLight(0xffffff, 1);
+light.position.set(0, 250, 700);
+scene.add(light);
+
+
+
+ var car = new Car();
+var car_body = car;
+scene.add(car_body.WholeCar);
+
+
+
+const geometry2 = new THREE.PlaneGeometry( 100, 100 );
+const material2 = new THREE.MeshLambertMaterial( {color: 0x828282, side: THREE.DoubleSide} );
+const plane = new THREE.Mesh( geometry2, material2 );
+scene.add( plane );
+plane.translateY=(-100);
+
+const geometry3 = new THREE.PlaneGeometry( 5, 100 );
+const material3 = new THREE.MeshLambertMaterial( {color: 0xffffff, side: THREE.DoubleSide} );
+const plane1 = new THREE.Mesh( geometry3, material3 );
+scene.add( plane1 );
+plane.translateY=(-100);
+
+
+
+document.addEventListener("keydown", onDocumentKeyDown, false);
+function onDocumentKeyDown(event) {
+
+    if(!played){
+        audio.play();
+        played=true;
+    }
+
+    var keyCode = event.which;
+    // up
+    if (keyCode == 87) {
+        car_body.WholeCar.position.y+= 2;
+        // down
+    } else if (keyCode == 83) {
+        car_body.WholeCar.position.y -= 2;
+        // left
+    } else if (keyCode == 65) {
+        car_body.WholeCar.position.x -= 2;
+        // right
+    } else if (keyCode == 68) {
+        car_body.WholeCar.position.x += 2;
+        // space
+    } else if (keyCode == 32) {
+        car_body.WholeCar.position.x = 0.0;
+        car_body.WholeCar.position.y = 0.0;
+    }
+    else if (keyCode == 83 && keyCode == 65){
+        cube.position.z -=2;
+
+    }
+    if(!gameover)
+         score++;
+text2.innerHTML = "Score:"+score;
+};
+
+var text2 = document.createElement('div');
+var text3 = document.createElement('div');
+text2.style.position = 'absolute';
+text2.style.zIndex = 1;    // if you still don't see the label, try uncommenting this
+text2.style.width = 80;
+text2.style.height = 50;
+text2.style.backgroundColor = "green";
+text2.style.top = 30 + 'px';
+text2.style.left = 10 + 'px';
+document.body.appendChild(text2);
+
+
+var obstacles = [];
+
+function createObstacle(){
+const loader = new THREE.CubeTextureLoader();
+loader.setPath( 'textures/' );
+const textureCube = loader.load( [
+'box.jpg', 'box.jpg',
+'box.jpg', 'box.jpg',
+'box.jpg', 'box.jpg'
+] );
+
+const geometry3 = new THREE.BoxGeometry( 10, 10, 10 );
+const material3 = new THREE.MeshLambertMaterial({color: 0x964B00, envMap: textureCube});
+const cube = new THREE.Mesh( geometry3, material3 );
+
+cube.position.y=100;
+cube.position.z=10;
+cube.position.x = Math.random()*(50 + 50) - 50; //(max - min) + min
+scene.add( cube );
+obstacles.push(cube);
+}
+
+var coins = [];
+
+function createCoin(){
+    const geometry3 = new THREE.BoxGeometry( 5, 5, 5);
+const material3 = new THREE.MeshLambertMaterial({color: 0xFFD700});
+const cube = new THREE.Mesh( geometry3, material3 );
+scene.add( cube );
+cube.position.y=100;
+cube.position.z=5;
+cube.position.x = Math.random()*(50 + 50) - 50; //(max - min) + min
+coins.push(cube);
+}
+
+function checkTouching(a, d) {
+  let b1 = a.WholeCar.position.y - a.CarBody.geometry.parameters.height / 2;
+  let t1 = a.WholeCar.position.y + a.CarBody.geometry.parameters.height / 2;
+  let r1 = a.WholeCar.position.x + a.CarBody.geometry.parameters.width / 2;
+  let l1 = a.WholeCar.position.x - a.CarBody.geometry.parameters.width / 2;
+  let f1 = a.WholeCar.position.z - a.CarBody.geometry.parameters.depth / 2;
+  let B1 = a.WholeCar.position.z + a.CarBody.geometry.parameters.depth / 2;
+  let b2 = d.position.y - d.geometry.parameters.height / 2;
+  let t2 = d.position.y + d.geometry.parameters.height / 2;
+  let r2 = d.position.x + d.geometry.parameters.width / 2;
+  let l2 = d.position.x - d.geometry.parameters.width / 2;
+  let f2 = d.position.z - d.geometry.parameters.depth / 2;
+  let B2 = d.position.z + d.geometry.parameters.depth / 2;
+  if (t1 < b2 || r1 < l2 || b1 > t2 || l1 > r2 || f1 > B2 || B1 < f2) {
+    return false;
+  }
+  return true;
+}
+var score =0;
+var gameover=false;
+/*setInterval(function(){
+    score++;
+text2.innerHTML = "Score:"+score;
+
+},1000);*/
+setInterval(function(){
+    createObstacle();
+},2000);
+setInterval(function(){
+    var rand = Math.random()*10;
+    if(rand > 7)
+    createCoin();
+},1000);
+const animate=() =>{
+    for(let i =0; i<obstacles.length;i++){
+        obstacles[i].position.y -= 0.5;
+        if(checkTouching(car_body,obstacles[i])){
+
+text3.style.position = 'absolute';
+text3.style.width = 90;
+text3.style.height = 30;
+text3.style.backgroundColor = "red";
+text3.style.top = 250 + 'px';
+text3.style.left = 720 + 'px';
+document.body.appendChild(text3);
+            text3.innerHTML="Game Over!";
+            console.log("collide");
+            text3.innerHTML="Game Over!!";
+            gameover=true;
+            audio.pause();
+            return;
+        }
+    }
+   
+    if(!gameover){
+    for(let i =0; i<coins.length;i++){
+        coins[i].position.y -= 0.5;
+        if(checkTouching(car_body,coins[i])){
+            scene.remove(coins[i]);
+            coins.splice(i,1);
+            score+=50;
+        }
+    }
+    }
+
+
+requestAnimationFrame(animate);
+renderer.render(scene, camera);
+
+}
+animate()
+</script>
+</body>
+</html>
